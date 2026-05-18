@@ -1,6 +1,7 @@
 package app;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,12 @@ import mystsstatsanalyser.jsonObjects.RunData;
 
 public class App {
 	
+	public static final Path folder = Path.of("D:","game_related","Streaming","slaythespire");
+	public static final Path outputFolder = Path.of("C:","Users","moritz.schick","eclipse-workspace","myrepos","mystsstatsanalyzer","resources","output");
+	
+	private static Path testPath = Path.of("C:","Users","moritz.schick","eclipse-workspace","myrepos","mystsstatsanalyzer","resources","history");
+	private static Path runHistoryFilePath = Path.of("C:","Users","Moritz","AppData","Roaming","SlayTheSpire2","steam","76561198070959178","profile1","saves","history");
+	
 	private static final String overgrowth = "ACT.OVERGROWTH";
 	private static final String underdocks = "ACT.UNDERDOCKS";
 
@@ -30,7 +37,7 @@ public class App {
 		
 		int version = 1;
 		
-		RunAnaylser analyzer = new RunAnaylser();
+		RunAnaylser analyzer = new RunAnaylser(testPath);
 		
 		List<BaseSTSStats> list_runs = new ArrayList<BaseSTSStats>();
 		int count = 0;
@@ -48,7 +55,7 @@ public class App {
 		
 		for (STSCharacter c : STSCharacter.values()) {
 			for (Map.Entry<String, CardCount> entry : c.getShowsCard().entrySet()) {
-				list_cards.add(new CardStatStats(c.toString(), entry.getKey(), analyzer.getWinrate(entry.getKey(),false, c), analyzer.getPickrate(entry.getKey(),false, c), analyzer.getWinrate(entry.getKey(),true, c), analyzer.getPickrate(entry.getKey(),true, c)));
+				list_cards.add(new CardStatStats(c.toString(), entry.getKey(), analyzer.getWinrate(entry.getKey(),false, c), analyzer.getPickrate(entry.getKey(),false, c),c.getEloCalculator().getElo(entry.getKey(), false), analyzer.getWinrate(entry.getKey(),true, c), analyzer.getPickrate(entry.getKey(),true, c),c.getEloCalculator().getElo(entry.getKey(), true)));
 			}
 			for (Map.Entry<String, Integer> entry : c.getShowsAncientBonus().entrySet()) {
 				list_ancient_choices.add(new AncientChoiceStats(c.toString(), entry.getKey(), analyzer.getWinrateAncientBonus(entry.getKey(), c), analyzer.getPickrateAncientBonus(entry.getKey(), c)));
@@ -64,22 +71,23 @@ public class App {
 			
 		}
 		
+		CsvWriter csvWriter = new CsvWriter(outputFolder);
 		
 		try {
-			CsvWriter.writeStats("monster_stats_" + version, list_monsters);
+			csvWriter.writeStats("monster_stats_" + version, list_monsters);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try {
-			CsvWriter.writeStats("card_stats_" + version, list_cards);
+			csvWriter.writeStats("card_stats_" + version, list_cards);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
 		try {
-			CsvWriter.writeStats("run_stats_"+ version, list_runs);
+			csvWriter.writeStats("run_stats_"+ version, list_runs);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -87,14 +95,14 @@ public class App {
 		
 
 		try {
-			CsvWriter.writeStats("ancient_stats_"+ version, list_ancient_choices);
+			csvWriter.writeStats("ancient_stats_"+ version, list_ancient_choices);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
 		try {
-			CsvWriter.writeStats("character_stats_"+ version, list_collected_stats);
+			csvWriter.writeStats("character_stats_"+ version, list_collected_stats);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

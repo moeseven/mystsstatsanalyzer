@@ -25,11 +25,14 @@ public enum STSCharacter {
 	
 	;
 	
+	public static final String skip = "CARD_REWARD_SKIP";
+	
 	private Map<AnalyzeList,List<RunData>> data_map = new HashMap<AnalyzeList,List<RunData>>();
 	
 	private HashMap<String, CardCount> pickwinsWithCard = new HashMap<String, CardCount>();
 	private HashMap<String, CardCount> picklossesWithCard = new HashMap<String, CardCount>();
 	private HashMap<String, CardCount> showsCard = new HashMap<String, CardCount>();
+
 	
 	private HashMap<String, Integer> pickwinsWithAncientBonus = new HashMap<String, Integer>();
 	private HashMap<String, Integer> picklossesWithAncientBonus = new HashMap<String, Integer>();
@@ -37,8 +40,21 @@ public enum STSCharacter {
 	
 	private HashMap<String,MonsterStat> monsters = new HashMap<String, MonsterStat>();
 	
+	private EloCalculator eloCalculator = new EloCalculator(this);
+	
+	
+	
+	public CardChoice getCard_choice_skip() {
+		return card_choice_skip;
+	}
+
+	private Card card_reward_skip;
+	private CardChoice card_choice_skip;
 	private STSCharacter() {
-		
+		card_reward_skip = new Card();
+		card_reward_skip.setId(skip);
+		card_choice_skip = new CardChoice();
+		card_choice_skip.setCard(card_reward_skip);
 	}
 
 	public void generatePickRatesAncientBonus(String ancient,List<AncientChoice> ac, RunData runData) {
@@ -56,6 +72,8 @@ public enum STSCharacter {
 		}
 	}
 	
+
+	
 	public void generatePickData() {
 		int act;
 		List<RunData> d = getData_map().get(AnalyzeList.Runs);
@@ -70,6 +88,15 @@ public enum STSCharacter {
 					String nodeType = mph.getMapPointType();
 					if(!mph.getMapPointType().equals(NodeType.shop.toString())) {
 						if (mph.getPlayerStats().getFirst().getCardChoices() != null) {
+							boolean wasSkipped = eloCalculator.determinEloChange(mph.getPlayerStats().getFirst().getCardChoices());
+							increaseCardCount(showsCard, card_reward_skip);
+							if (wasSkipped) {
+								if (runData.getWin()) {
+									increaseCardCount(pickwinsWithCard, card_reward_skip);
+								}else {
+									increaseCardCount(picklossesWithCard, card_reward_skip);
+								}
+							}
 							for (Iterator iterator3 = mph.getPlayerStats().getFirst().getCardChoices().iterator(); iterator3.hasNext();) {
 								generateCardChoice(runData, iterator3);
 							}
@@ -102,13 +129,13 @@ public enum STSCharacter {
 			upgraded = true;
 		}
 		if (!map.containsKey(card.getId())) {
-			map.put(card.getId(), new CardCount());
+			map.put(card.getId(), new CardCount(0));
 		}
 		map.get(card.getId()).increment(upgraded);
 	}
 
-	public void generateCardChoice(RunData runData, Iterator iterator3) {
-		CardChoice card_choice = (CardChoice) iterator3.next();
+	public void generateCardChoice(RunData runData, Iterator iterator) {
+		CardChoice card_choice = (CardChoice) iterator.next();
 		Card card = card_choice.getCard();	
 		increaseCardCount(showsCard, card);
 		if (card_choice.getWasPicked()) {
@@ -158,6 +185,10 @@ public enum STSCharacter {
 
 	public HashMap<String, MonsterStat> getMonsters() {
 		return monsters;
+	}
+
+	public EloCalculator getEloCalculator() {
+		return eloCalculator;
 	}
 
 

@@ -8,11 +8,21 @@ import java.util.List;
 
 public class CsvWriter {
 	
-	public static final Path folder = Path.of("D:","game_related","Streaming","slaythespire");
+	
+	
+	
+	
+	public CsvWriter(Path writePath) {
+		super();
+		this.writePath = writePath;
+	}
 
 
-	public static void writeStats(String file, List<BaseSTSStats> stat_list)throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(folder.resolve(file))) {
+	private Path writePath;
+
+
+	public void writeStats(String file, List<BaseSTSStats> stat_list)throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(writePath.resolve(file+ ".csv"))) {
 
             // header
             writer.write(stat_list.getFirst().headerRow());

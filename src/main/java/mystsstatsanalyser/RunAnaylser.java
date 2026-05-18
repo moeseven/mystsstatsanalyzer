@@ -1,5 +1,6 @@
 package mystsstatsanalyser;
 
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,17 +13,20 @@ public class RunAnaylser {
 	private List<RunData> data;
 	
 	private static String game_mode_standard = "standard";
-
 	
+
+
+	private Path sourcePath;
 	
 	public List<RunData> getData() {
 		return data;
 	}
 
 
-	public RunAnaylser() {
+	public RunAnaylser(Path sourcePath) {
 		super();
-		RunReader reader = new RunReader();		
+		this.sourcePath = sourcePath;
+		RunReader reader = new RunReader(this.sourcePath);		
 		List<RunData> runDataList = reader.readAllData();
 		System.out.println(runDataList.size());
 		runDataList = runDataList.stream()
