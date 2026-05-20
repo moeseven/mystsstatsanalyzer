@@ -58,7 +58,7 @@ public class WinContributionCalculator {
 			Card card = (Card) iterator.next();
 			allCards.add(card.getId());
 			if (!winContributions.containsKey(card.getId())) {
-				winContributions.put(card.getId(), new CardWinContribution());
+				winContributions.put(card.getId(), new CardWinContribution(stsc.getWinrate()));
 			}
 			CardWinContribution contribution = winContributions.get(card.getId());		
 			if (isUpgraded(card)) {

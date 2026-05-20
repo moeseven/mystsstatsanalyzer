@@ -55,40 +55,30 @@ public class RunAnaylser {
 		return data.stream().filter(e -> e.getPlayers().getFirst().getCharacter().equals(character.getExtendedString())).toList();
 	}
 	
-	private double calcTruncatedRate(int wins, int losses) {
-		double retVal = 0;
-		if (losses >= 0 && wins >= 0 && wins+losses > 0) {
-			retVal = 1.0 * wins / (wins + losses);
-		}
-		return STSAnalyserUtils.truncateToTwoDecimals(retVal);
-	}
+
 
 
 	
 	public double getWinrateAncientBonus(String ancient, STSCharacter character) {
 		int losses = character.getPicklossesWithAncientBonus().containsKey(ancient) ? character.getPicklossesWithAncientBonus().get(ancient) : 0;
 		int wins = character.getPickwinsWithAncientBonus().containsKey(ancient) ? character.getPickwinsWithAncientBonus().get(ancient) : 0;
-		return calcTruncatedRate(wins, losses);
+		return STSAnalyserUtils.calcTruncatedRate(wins, losses);
 	}
 	
 	public double getWinrate(String card,boolean upgraded, STSCharacter character) {
 		int losses = character.getPicklossesWithCard().containsKey(card) ? character.getPicklossesWithCard().get(card).getCount(upgraded) : 0;
 		int wins = character.getPickwinsWithCard().containsKey(card) ? character.getPickwinsWithCard().get(card).getCount(upgraded) : 0;
-		return calcTruncatedRate(wins, losses);
+		return STSAnalyserUtils.calcTruncatedRate(wins, losses);
 	}
 	
 	public double getPickrate(String card,boolean upgraded, STSCharacter character) {
 		int losses = character.getPicklossesWithCard().containsKey(card) ? character.getPicklossesWithCard().get(card).getCount(upgraded) : 0;
 		int wins = character.getPickwinsWithCard().containsKey(card) ? character.getPickwinsWithCard().get(card).getCount(upgraded) : 0;
 		int shows = character.getShowsCard().containsKey(card) ? character.getShowsCard().get(card).getCount(upgraded) : 0;
-		return calcTruncatedRate(wins+losses, shows);
+		return STSAnalyserUtils.calcTruncatedRate(wins+losses, shows);
 	}
 	
-	public double getWinrate(STSCharacter character) {
-		int losses = character.getData_map().get(AnalyzeList.LOSSES).size();
-		int wins = character.getData_map().get(AnalyzeList.WINS).size();
-		return calcTruncatedRate(wins, losses);
-	}
+
 	
 	public double getWinrate(STSCharacter character, String act) {
 		int losses = 0;
@@ -105,7 +95,7 @@ public class RunAnaylser {
 				wins++;
 			}
 		}
-		return calcTruncatedRate(wins, losses);
+		return STSAnalyserUtils.calcTruncatedRate(wins, losses);
 	}
 	
 	public double getAvgFloorReached(STSCharacter character, String act) {
@@ -164,13 +154,13 @@ public class RunAnaylser {
 		int losses = character.getLossesWithRelic().containsKey(relic) ? character.getLossesWithRelic().get(relic) : 0;
 		int wins = character.getWinsWithRelic().containsKey(relic) ? character.getWinsWithRelic().get(relic) : 0;
 		int shows = character.getShowsRelic().containsKey(relic) ? character.getShowsRelic().get(relic) : 0;
-		return calcTruncatedRate(wins, losses);
+		return STSAnalyserUtils.calcTruncatedRate(wins, losses);
 	}
 	
 	public double getPickrateAncientBonus(String ancient, STSCharacter character) {
 		int losses = character.getPicklossesWithAncientBonus().containsKey(ancient) ? character.getPicklossesWithAncientBonus().get(ancient) : 0;
 		int wins = character.getPickwinsWithAncientBonus().containsKey(ancient) ? character.getPickwinsWithAncientBonus().get(ancient) : 0;
 		int shows = character.getShowsAncientBonus().containsKey(ancient) ? character.getShowsAncientBonus().get(ancient) : 0;
-		return calcTruncatedRate(wins+losses, shows);
+		return STSAnalyserUtils.calcTruncatedRate(wins+losses, shows);
 	}
 }

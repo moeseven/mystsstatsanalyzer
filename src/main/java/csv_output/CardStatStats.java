@@ -2,6 +2,7 @@ package csv_output;
 
 import javax.swing.plaf.synth.SynthGraphicsUtils;
 
+import mystsstatsanalyser.WinContributionCalculator;
 import tools.STSAnalyserUtils;
 
 public class CardStatStats extends BaseSTSStats{
@@ -17,11 +18,11 @@ public class CardStatStats extends BaseSTSStats{
 	private final int pick_elo_upgraded;	
 	private final double card_win_contribution_upgraded;
 	
+	private final double character_wr;
 
 
 
-
-	public CardStatStats(String character, String card, double win_rate_picked, double pick_rate, int pick_elo,
+	public CardStatStats(String character, double character_wr, String card, double win_rate_picked, double pick_rate, int pick_elo,
 			double card_win_contribution, double win_rate_picked_upgraded, double pick_rate_upgraded,
 			int pick_elo_upgraded, double card_win_contribution_upgraded) {
 		super();
@@ -35,6 +36,7 @@ public class CardStatStats extends BaseSTSStats{
 		this.pick_rate_upgraded = pick_rate_upgraded;
 		this.pick_elo_upgraded = pick_elo_upgraded;
 		this.card_win_contribution_upgraded = card_win_contribution_upgraded;
+		this.character_wr = character_wr;
 	}
 
 
@@ -46,11 +48,11 @@ public class CardStatStats extends BaseSTSStats{
                 +"," + win_rate_picked
                 +"," + pick_rate
                 +"," + (pick_elo)
-                +"," + STSAnalyserUtils.truncateToTwoDecimals(card_win_contribution)
+                +"," + (STSAnalyserUtils.truncateToTwoDecimals(card_win_contribution - character_wr))
                 +"," + win_rate_picked_upgraded
                 +"," + pick_rate_upgraded
                 +"," + (pick_elo_upgraded)
-                +"," + STSAnalyserUtils.truncateToTwoDecimals(card_win_contribution_upgraded)
+                +"," + (STSAnalyserUtils.truncateToTwoDecimals(card_win_contribution_upgraded - character_wr))
                 ;
 	}
 	

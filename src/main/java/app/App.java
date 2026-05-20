@@ -58,6 +58,7 @@ public class App {
 		for (STSCharacter c : STSCharacter.values()) {
 			for (String card : c.getWinContributionCalc().getAllCards()) {
 				list_cards.add(new CardStatStats(c.toString()
+						,c.getWinrate()
 						, card
 						, analyzer.getWinrate(card,false, c)
 						, analyzer.getPickrate(card,false, c)
@@ -76,7 +77,7 @@ public class App {
 				list_relics.add(new RelicStats(c.toString(),entry.getKey(),analyzer.getWinrateRelic(entry.getKey(), c)));
 			}
 
-			list_collected_stats.add(new CharacterCollectedStats(c.toString(), analyzer.getAvgFloorReached(c), analyzer.getWinrate(c),analyzer.getAvgFloorReached(c, underdocks),analyzer.getWinrate(c, underdocks),analyzer.getAvgFloorReached(c, overgrowth),analyzer.getWinrate(c, overgrowth)));
+			list_collected_stats.add(new CharacterCollectedStats(c.toString(), analyzer.getAvgFloorReached(c), c.getWinrate(),analyzer.getAvgFloorReached(c, underdocks),analyzer.getWinrate(c, underdocks),analyzer.getAvgFloorReached(c, overgrowth),analyzer.getWinrate(c, overgrowth)));
 			for (Map.Entry<String, MonsterStat> monster : c.getMonsters().entrySet()) {
 				double records = monster.getValue().getRecords();
 				if (records > 0) {

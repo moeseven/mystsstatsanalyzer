@@ -17,6 +17,7 @@ import mystsstatsanalyser.jsonObjects.Deck;
 import mystsstatsanalyser.jsonObjects.MapPointHistory;
 import mystsstatsanalyser.jsonObjects.Relic;
 import mystsstatsanalyser.jsonObjects.RunData;
+import tools.STSAnalyserUtils;
 
 public enum STSCharacter {
 	IRONCLAD,
@@ -79,7 +80,11 @@ public enum STSCharacter {
 		}
 	}
 	
-
+	public double getWinrate() {
+		int losses = getData_map().get(AnalyzeList.LOSSES).size();
+		int wins = getData_map().get(AnalyzeList.WINS).size();
+		return STSAnalyserUtils.calcTruncatedRate(wins, losses);
+	}
 	
 	public void generatePickData() {
 		int act;
