@@ -72,6 +72,9 @@ public class EloCalculator {
 
 	
 	public int getElo(String card, boolean upgraded) {
+		if (!cardElo.containsKey(card)) {
+			return 0;
+		}
 		return upgraded ? cardElo.get(card).getUpgraded() : cardElo.get(card).getBasic();
 	}
 	

@@ -14,6 +14,7 @@ import csv_output.CardStatStats;
 import csv_output.CharacterCollectedStats;
 import csv_output.CsvWriter;
 import csv_output.MonsterStrength;
+import csv_output.RelicStats;
 import csv_output.RunDataStats;
 import mystsstatsanalyser.MonsterStat;
 import mystsstatsanalyser.RunAnaylser;
@@ -50,15 +51,29 @@ public class App {
 
 		List<BaseSTSStats> list_cards = new ArrayList<BaseSTSStats>();
 		List<BaseSTSStats> list_ancient_choices = new ArrayList<BaseSTSStats>();
+		List<BaseSTSStats> list_relics = new ArrayList<BaseSTSStats>();
 		List<BaseSTSStats> list_collected_stats = new ArrayList<BaseSTSStats>();
 		List<BaseSTSStats> list_monsters = new ArrayList<BaseSTSStats>();
 		
 		for (STSCharacter c : STSCharacter.values()) {
-			for (Map.Entry<String, CardCount> entry : c.getShowsCard().entrySet()) {
-				list_cards.add(new CardStatStats(c.toString(), entry.getKey(), analyzer.getWinrate(entry.getKey(),false, c), analyzer.getPickrate(entry.getKey(),false, c),c.getEloCalculator().getElo(entry.getKey(), false), analyzer.getWinrate(entry.getKey(),true, c), analyzer.getPickrate(entry.getKey(),true, c),c.getEloCalculator().getElo(entry.getKey(), true)));
+			for (String card : c.getWinContributionCalc().getAllCards()) {
+				list_cards.add(new CardStatStats(c.toString()
+						, card
+						, analyzer.getWinrate(card,false, c)
+						, analyzer.getPickrate(card,false, c)
+						,c.getEloCalculator().getElo(card, false)
+						,c.getWinContributionCalc().getWinContributions().get(card).getBasic()
+						, analyzer.getWinrate(card,true, c)
+						, analyzer.getPickrate(card,true, c)
+						,c.getEloCalculator().getElo(card, true)
+						,c.getWinContributionCalc().getWinContributions().get(card).getUpgraded())
+						);
 			}
 			for (Map.Entry<String, Integer> entry : c.getShowsAncientBonus().entrySet()) {
 				list_ancient_choices.add(new AncientChoiceStats(c.toString(), entry.getKey(), analyzer.getWinrateAncientBonus(entry.getKey(), c), analyzer.getPickrateAncientBonus(entry.getKey(), c)));
+			}
+			for (Map.Entry<String, Integer> entry : c.getShowsRelic().entrySet()) {
+				list_relics.add(new RelicStats(c.toString(),entry.getKey(),analyzer.getWinrateRelic(entry.getKey(), c)));
 			}
 
 			list_collected_stats.add(new CharacterCollectedStats(c.toString(), analyzer.getAvgFloorReached(c), analyzer.getWinrate(c),analyzer.getAvgFloorReached(c, underdocks),analyzer.getWinrate(c, underdocks),analyzer.getAvgFloorReached(c, overgrowth),analyzer.getWinrate(c, overgrowth)));
@@ -98,6 +113,12 @@ public class App {
 			csvWriter.writeStats("ancient_stats_"+ version, list_ancient_choices);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			csvWriter.writeStats("relic_stats_"+ version, list_relics);
+		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		

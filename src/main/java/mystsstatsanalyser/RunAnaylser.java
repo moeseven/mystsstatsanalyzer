@@ -160,7 +160,13 @@ public class RunAnaylser {
 		return floors;
 	}
 
-
+	public double getWinrateRelic(String relic, STSCharacter character) {
+		int losses = character.getLossesWithRelic().containsKey(relic) ? character.getLossesWithRelic().get(relic) : 0;
+		int wins = character.getWinsWithRelic().containsKey(relic) ? character.getWinsWithRelic().get(relic) : 0;
+		int shows = character.getShowsRelic().containsKey(relic) ? character.getShowsRelic().get(relic) : 0;
+		return calcTruncatedRate(wins, losses);
+	}
+	
 	public double getPickrateAncientBonus(String ancient, STSCharacter character) {
 		int losses = character.getPicklossesWithAncientBonus().containsKey(ancient) ? character.getPicklossesWithAncientBonus().get(ancient) : 0;
 		int wins = character.getPickwinsWithAncientBonus().containsKey(ancient) ? character.getPickwinsWithAncientBonus().get(ancient) : 0;

@@ -13,7 +13,9 @@ import csv_output.MonsterStrength;
 import mystsstatsanalyser.jsonObjects.AncientChoice;
 import mystsstatsanalyser.jsonObjects.Card;
 import mystsstatsanalyser.jsonObjects.CardChoice;
+import mystsstatsanalyser.jsonObjects.Deck;
 import mystsstatsanalyser.jsonObjects.MapPointHistory;
+import mystsstatsanalyser.jsonObjects.Relic;
 import mystsstatsanalyser.jsonObjects.RunData;
 
 public enum STSCharacter {
@@ -38,10 +40,15 @@ public enum STSCharacter {
 	private HashMap<String, Integer> picklossesWithAncientBonus = new HashMap<String, Integer>();
 	private HashMap<String, Integer> showsAncientBonus = new HashMap<String, Integer>();
 	
+	private HashMap<String, Integer> winsWithRelic = new HashMap<String, Integer>();
+	private HashMap<String, Integer> lossesWithRelic = new HashMap<String, Integer>();
+	private HashMap<String, Integer> showsRelic = new HashMap<String, Integer>();
+	
+	
 	private HashMap<String,MonsterStat> monsters = new HashMap<String, MonsterStat>();
 	
 	private EloCalculator eloCalculator = new EloCalculator(this);
-	
+	private WinContributionCalculator winContributionCalc = new WinContributionCalculator(this);
 	
 	
 	public CardChoice getCard_choice_skip() {
@@ -76,9 +83,11 @@ public enum STSCharacter {
 	
 	public void generatePickData() {
 		int act;
-		List<RunData> d = getData_map().get(AnalyzeList.Runs);
+		List<RunData> d = getData_map().get(AnalyzeList.Runs);		
 		for (Iterator iterator = d.iterator(); iterator.hasNext();) {
 			RunData runData = (RunData) iterator.next();
+			winContributionCalc.collectData(runData);
+			generateRelicData(runData);
 			act = 0;
 			for (Iterator iteratorAct = runData.getMapPointHistory().iterator(); iteratorAct.hasNext();) {
 				act++;
@@ -123,6 +132,21 @@ public enum STSCharacter {
 		}
 	}
 	
+	
+
+	private void generateRelicData(RunData runData) {
+		for (Iterator iterator = runData.getPlayers().getFirst().getRelics().iterator(); iterator.hasNext();) {
+			Relic relic = (Relic) iterator.next();
+			if (runData.getWin()) {
+				winsWithRelic.merge(relic.getId(), 1, Integer::sum);
+			}else {
+				lossesWithRelic.merge(relic.getId(), 1, Integer::sum);
+			}
+			showsRelic.merge(relic.getId(), 1, Integer::sum);
+		}
+		
+	}
+
 	private void increaseCardCount(HashMap<String, CardCount> map, Card card) {
 		boolean upgraded = false;
 		if (card.getCurrentUpgradeLevel() != null && card.getCurrentUpgradeLevel() == 1) {
@@ -189,6 +213,22 @@ public enum STSCharacter {
 
 	public EloCalculator getEloCalculator() {
 		return eloCalculator;
+	}
+
+	public HashMap<String, Integer> getWinsWithRelic() {
+		return winsWithRelic;
+	}
+
+	public HashMap<String, Integer> getLossesWithRelic() {
+		return lossesWithRelic;
+	}
+
+	public HashMap<String, Integer> getShowsRelic() {
+		return showsRelic;
+	}
+
+	public WinContributionCalculator getWinContributionCalc() {
+		return winContributionCalc;
 	}
 
 

@@ -29,7 +29,7 @@ private List<Object> badges;
 @JsonProperty("character")
 private String character;
 @JsonProperty("deck")
-private List<Deck> deck;
+private List<Card> deck;
 @JsonProperty("id")
 private Integer id;
 @JsonProperty("max_potion_slot_count")
@@ -62,12 +62,12 @@ this.character = character;
 }
 
 @JsonProperty("deck")
-public List<Deck> getDeck() {
+public List<Card> getDeck() {
 return deck;
 }
 
 @JsonProperty("deck")
-public void setDeck(List<Deck> deck) {
+public void setDeck(List<Card> deck) {
 this.deck = deck;
 }
 
