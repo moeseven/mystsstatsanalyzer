@@ -6,19 +6,62 @@ import java.util.LinkedList;
 import java.util.List;
 
 import csv_output.CardCount;
+import mystsstatsanalyser.jsonObjects.AncientChoice;
 import mystsstatsanalyser.jsonObjects.CardChoice;
 
 public class EloCalculator {
 
+	public static final int start_elo = 1000;
+	private final int elo_change_factor = 32;
 	
 	private HashMap<String, CardCount> cardElo = new HashMap<String, CardCount>();
-	
+	private HashMap<String, Integer> ancientElo = new HashMap<String, Integer>();
 	
 	private STSCharacter stsc;
 	
 	public EloCalculator(STSCharacter s) {
 		super();
 		stsc = s;
+	}
+	
+	public void determinEloChangeAncientBonus(List<AncientChoice> choices) {
+		String picked = STSCharacter.skip;
+		List<AncientChoice> pickedFirstChoiceList = new LinkedList<AncientChoice>();
+		for (Iterator iterator = choices.iterator(); iterator.hasNext();) {
+			AncientChoice ancientChoice = (AncientChoice) iterator.next();
+			if (ancientChoice.getWasChosen()) {
+				picked = ancientChoice.getTextKey();
+				pickedFirstChoiceList.addFirst(ancientChoice);
+			}else {
+				pickedFirstChoiceList.add(ancientChoice);
+			}
+		}
+
+		adjustEloAncientBonus(pickedFirstChoiceList);
+	}
+	
+	private void adjustEloAncientBonus(List<AncientChoice> options) {
+		List<Integer> elos = new LinkedList<Integer>();
+		for (Iterator iterator = options.iterator(); iterator.hasNext();) {
+			AncientChoice ancientChoice = (AncientChoice) iterator.next();
+			String id = ancientChoice.getTextKey();
+			if (ancientElo.containsKey(id)) {
+				elos.add(ancientElo.get(id));
+			}else {
+				elos.add(start_elo);
+			}
+		}
+		LinkedList<Integer> eloChange = calcEloChange(elos);
+		for (int i = 0; i < options.size(); i++) {
+			addAncientChoiceElo(options.get(i),eloChange.get(i));
+		}
+	}
+	
+	private void addAncientChoiceElo(AncientChoice ancientChoice, int mod) {
+		if (!ancientElo.containsKey(ancientChoice.getTextKey())) {
+			ancientElo.put(ancientChoice.getTextKey(), start_elo);
+		}		
+		ancientElo.put(ancientChoice.getTextKey(), modifyEloFloorOne(mod, ancientElo.get(ancientChoice.getTextKey())));
 	}
 
 	public boolean determinEloChange(List<CardChoice> choices) {
@@ -50,7 +93,7 @@ public class EloCalculator {
 			if (cardElo.containsKey(card_id)) {
 				elos.add(cardElo.get(card_id).getBasic());
 			}else {
-				elos.add(1);
+				elos.add(start_elo);
 			}
 		}
 		LinkedList<Integer> eloChange = calcEloChange(elos);
@@ -61,7 +104,7 @@ public class EloCalculator {
 
 	private void addElo(CardChoice card, int i) {
 		if (!cardElo.containsKey(card.getCard().getId())) {
-			cardElo.put(card.getCard().getId(), new CardCount(1));
+			cardElo.put(card.getCard().getId(), new CardCount(start_elo));
 		}
 		cardElo.get(card.getCard().getId()).modifyFloorOne(i, isUpgraded(card));
 	}
@@ -73,12 +116,12 @@ public class EloCalculator {
 	
 	public int getElo(String card, boolean upgraded) {
 		if (!cardElo.containsKey(card)) {
-			return 0;
+			return start_elo;
 		}
 		return upgraded ? cardElo.get(card).getUpgraded() : cardElo.get(card).getBasic();
 	}
 	
-	private final int elo_change_factor = 32;
+	
 	
 	private LinkedList<Integer> calcEloChange(List<Integer> elos) {
 		int winElo = elos.getFirst();
@@ -96,10 +139,22 @@ public class EloCalculator {
 			if (i == 0) {
 				retVal.add(winEloGain);
 			}else {
-				int eloLoss = elo_old / (totalElo - winElo) * winEloGain;
+				int eloLoss = (int) (1.0 * elo_old / (totalElo - winElo) * winEloGain);
 				retVal.add(-eloLoss);
 			}			
 		}		
 		return retVal;
+	}
+	
+
+	public int getAncientElo(String ancient) {
+		if (!ancientElo.containsKey(ancient)) {
+			return start_elo;
+		}
+		return ancientElo.get(ancient);
+	}
+	
+	public static int modifyEloFloorOne(int mod, int old_value) {
+			return (old_value + mod <= 0) ? 1 : old_value + mod;
 	}
 }

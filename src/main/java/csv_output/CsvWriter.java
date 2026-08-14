@@ -9,7 +9,7 @@ import java.util.List;
 public class CsvWriter {
 	
 	
-	
+	public  static String seperator = ",";
 	
 	
 	public CsvWriter(Path writePath) {
@@ -30,7 +30,7 @@ public class CsvWriter {
 
             // rows
             for (BaseSTSStats card : stat_list) {
-                writer.write(card.toString());
+                writer.write(card.printRow());
                 writer.newLine();
             }
         }

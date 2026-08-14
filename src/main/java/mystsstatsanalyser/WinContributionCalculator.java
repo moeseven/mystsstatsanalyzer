@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import mystsstatsanalyser.jsonObjects.Card;
+import mystsstatsanalyser.jsonObjects.Relic;
 import mystsstatsanalyser.jsonObjects.RunData;
 
 public class WinContributionCalculator {
 
-	private final double fitting_factor = -0.77;
 	private STSCharacter stsc;
 
 	public WinContributionCalculator(STSCharacter stsc) {
@@ -18,32 +18,64 @@ public class WinContributionCalculator {
 		this.stsc = stsc;
 	}
 
-	private HashMap<String, CardWinContribution> winContributions = new HashMap<String, CardWinContribution>();
+	private HashMap<String, CardWinContribution> cardWinContributions = new HashMap<String, CardWinContribution>();
+	private HashMap<String, WinContribution> relicWinContributions = new HashMap<String, WinContribution>();
 	
 	private HashSet<String> allCards = new HashSet<String>();
+	
+	private HashSet<String> allRelics = new HashSet<String>();
 
 	
-	public void collectData(RunData runData) {
+	public void collectData(RunData runData, int skipCount) {
 		List<Card> deck = runData.getPlayers().getFirst().getDeck();
-		int deck_size = deck.size();
+		addSkips(deck,skipCount);
 		int actual_result = 0;
 		if (runData.getWin()) {
 			actual_result = 1;
 		}
-		double calculated_result = calcResult(deck);
-		double deviation = calculated_result - actual_result;
-		fit(deck, deviation);
-
+		double calculated_result = calcCardResult(deck);
+		double deviation = actual_result - calculated_result;
+		fitCards(deck, deviation);
 	}
 	
+	public void collectRelicData(RunData runData) {
+		List<Relic> relics = runData.getPlayers().getFirst().getRelics();
+		int actual_result = 0;
+		if (runData.getWin()) {
+			actual_result = 1;
+		}
+		double calculated_result = calcRelicResult(relics);
+		double deviation = actual_result - calculated_result;
+		fit(relics,deviation);
+	}
 
 
-	private void fit(List<Card> deck, double deviation) {
-		double fitting = deviation * fitting_factor / deck.size();
+
+
+	
+
+	private void addSkips(List<Card> deck, int numberOfSkips) {
+		for (int i = 0; i < numberOfSkips; i++) {
+			deck.add(stsc.getCard_choice_skip().getCard());
+		}
+	}
+
+
+	private void fitCards(List<Card> deck, double deviation) {
+		double fittingValue = deviation;
 		for (Iterator iterator = deck.iterator(); iterator.hasNext();) {
 			Card card = (Card) iterator.next();
-			CardWinContribution contribution = winContributions.get(card.getId());		
-			contribution.modify(fitting, isUpgraded(card));			
+			CardWinContribution contribution = cardWinContributions.get(card.getId());		
+			contribution.modifyDiminishingly(fittingValue, isUpgraded(card));			
+		}
+	}
+	
+	private void fit(List<Relic> relics, double deviation) {
+		double fittingValue = deviation;
+		for (Iterator iterator = relics.iterator(); iterator.hasNext();) {
+			Relic relic = (Relic) iterator.next();
+			WinContribution contribution = relicWinContributions.get(relic.getId());		
+			contribution.modifyDiminishingly(fittingValue);			
 		}
 	}
 
@@ -52,31 +84,50 @@ public class WinContributionCalculator {
 		return card.getCurrentUpgradeLevel()!= null;
 	}
 	
-	private double calcResult(List<Card> deck) {
+	private double calcCardResult(List<Card> deck) {
 		double result = 0;
 		for (Iterator iterator = deck.iterator(); iterator.hasNext();) {
 			Card card = (Card) iterator.next();
 			allCards.add(card.getId());
-			if (!winContributions.containsKey(card.getId())) {
-				winContributions.put(card.getId(), new CardWinContribution(stsc.getWinrate()));
+			if (!cardWinContributions.containsKey(card.getId())) {
+				cardWinContributions.put(card.getId(), new CardWinContribution(stsc.getWinrate()));
 			}
-			CardWinContribution contribution = winContributions.get(card.getId());		
+			CardWinContribution contribution = cardWinContributions.get(card.getId());		
 			if (isUpgraded(card)) {
-				result += contribution.upgraded;
+				result += contribution.getUpgraded().getValue();
 			}else {
-				result+= contribution.basic;
+				result+= contribution.getBasic().getValue();
 			}
 			
 		}
 		return result/deck.size();
 	}
+	
 
-
-	public HashMap<String, CardWinContribution> getWinContributions() {
-		return winContributions;
+	private double calcRelicResult(List<Relic> relics) {
+		double result = 0;
+		for (Iterator iterator = relics.iterator(); iterator.hasNext();) {
+			Relic relic = (Relic) iterator.next();
+			allRelics.add(relic.getId());
+			if (!relicWinContributions.containsKey(relic.getId())) {
+				relicWinContributions.put(relic.getId(), new WinContribution(stsc.getWinrate()));
+			}
+			WinContribution contribution = relicWinContributions.get(relic.getId());		
+			result += contribution.getValue();
+		}
+		return result/relics.size();
 	}
 
 
+	public HashMap<String, CardWinContribution> getCardWinContributions() {
+		return cardWinContributions;
+	}
+
+
+
+	public HashMap<String, WinContribution> getRelicWinContributions() {
+		return relicWinContributions;
+	}
 
 	public HashSet<String> getAllCards() {
 		return allCards;

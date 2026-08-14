@@ -2,10 +2,12 @@ package mystsstatsanalyser;
 
 public class MonsterStat {
 	
+	
+	
 	int damage = 0;
 	int turns = 0;
 	int records = 0;
-	int wins = 0;
+	int kills = 0;
 	String act;
 	int act_number;
 	String type;
@@ -19,11 +21,11 @@ public class MonsterStat {
 		this.type = type;
 	}
 
-	public void merge(int damage, int turns, boolean win) {
+	public void merge(int damage, int turns, boolean kills) {
 		this.damage += damage;
 		this.turns += turns;
-		if (win) {
-			this.wins++;
+		if (kills) {
+			this.kills++;
 		}
 		records++;
 	}
@@ -40,8 +42,8 @@ public class MonsterStat {
 		return records;
 	}
 
-	public int getWins() {
-		return wins;
+	public int getKills() {
+		return kills;
 	}
 
 	public String getAct() {

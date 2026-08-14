@@ -98,17 +98,7 @@ public class RunAnaylser {
 		return STSAnalyserUtils.calcTruncatedRate(wins, losses);
 	}
 	
-	public double getAvgFloorReached(STSCharacter character, String act) {
-		List<RunData> data_list = character.getData_map().get(AnalyzeList.Runs);
-		int floor = 0;
-		for (Iterator iterator = data_list.iterator(); iterator.hasNext();) {
-			RunData runData = (RunData) iterator.next();
-			if (containsAct(runData,act)) {
-				floor += getFloorReached(runData);
-			}			
-		}
-		return STSAnalyserUtils.truncateToTwoDecimals(1.0 * floor / data_list.size());
-	}
+	
 
 
 	public boolean containsAct(RunData runData, String act) {
@@ -123,6 +113,20 @@ public class RunAnaylser {
 	
 	public String getActString(RunData runData, int index) {
 		return runData.getActs().get(index);
+	}
+	
+	public double getAvgFloorReached(STSCharacter character, String act) {
+		List<RunData> data_list = character.getData_map().get(AnalyzeList.Runs);
+		int floor = 0;
+		int count = 0;
+		for (Iterator iterator = data_list.iterator(); iterator.hasNext();) {
+			RunData runData = (RunData) iterator.next();
+			if (containsAct(runData,act)) {
+				count++;
+				floor += getFloorReached(runData);
+			}			
+		}
+		return STSAnalyserUtils.truncateToTwoDecimals(1.0 * floor / count);
 	}
 	
 	public double getAvgFloorReached(STSCharacter character) {

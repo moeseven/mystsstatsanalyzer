@@ -2,6 +2,41 @@ package csv_output;
 
 public class RunDataStats extends BaseSTSStats{
 	
+	
+	
+	
+	public int getRun_id() {
+		return run_id;
+	}
+
+	public String getCharacter() {
+		return character;
+	}
+
+	public boolean isWon() {
+		return won;
+	}
+
+	public int getFloor_reached() {
+		return floor_reached;
+	}
+
+	public String getDeathCause() {
+		return deathCause;
+	}
+
+	public String getAct1() {
+		return act1;
+	}
+
+	public String getAct2() {
+		return act2;
+	}
+
+	public String getAct3() {
+		return act3;
+	}
+
 	private final int run_id;
 	private final String character;
 	private final boolean won;
@@ -18,7 +53,7 @@ public class RunDataStats extends BaseSTSStats{
 			String act2, String act3) {
 		super();
 		this.run_id = run_id;
-		this.character = character;
+		this.character = character.substring(character.lastIndexOf('.') + 1);
 		this.won = won;
 		this.floor_reached = floor_reached;
 		this.deathCause = deathCause;
@@ -28,20 +63,20 @@ public class RunDataStats extends BaseSTSStats{
 	}
 
 	@Override
-	public String toString() {
+	public String printRow() {
 		return 	run_id
-				+"," + character.substring(character.lastIndexOf('.') + 1)
-                +"," + (won ? 1:0)
-                +"," + floor_reached
-                +"," + deathCause
-                +"," + act1
-                +"," + act2
-                +"," + act3
+				+CsvWriter.seperator + character
+                +CsvWriter.seperator + (won ? 1:0)
+                +CsvWriter.seperator + floor_reached
+                +CsvWriter.seperator + deathCause
+                +CsvWriter.seperator + act1
+                +CsvWriter.seperator + act2
+                +CsvWriter.seperator + act3
                 ;
 	}
 	
 	public String headerRow() {
-		return "run id,character,won,floor reached,death cause, act1, act2, act3";
+		return String.join(CsvWriter.seperator, "run id","character","won","floor reached","death cause", "act1", "act2", "act3");
 	}
 
 }

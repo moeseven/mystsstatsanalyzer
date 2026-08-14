@@ -28,7 +28,7 @@ public enum STSCharacter {
 	
 	;
 	
-	public static final String skip = "CARD_REWARD_SKIP";
+	public static final String skip = "CARD_REWARD.SKIP";
 	
 	private Map<AnalyzeList,List<RunData>> data_map = new HashMap<AnalyzeList,List<RunData>>();
 	
@@ -91,49 +91,57 @@ public enum STSCharacter {
 		List<RunData> d = getData_map().get(AnalyzeList.Runs);		
 		for (Iterator iterator = d.iterator(); iterator.hasNext();) {
 			RunData runData = (RunData) iterator.next();
-			winContributionCalc.collectData(runData);
+			int skipCount = 0;
 			generateRelicData(runData);
 			act = 0;
 			for (Iterator iteratorAct = runData.getMapPointHistory().iterator(); iteratorAct.hasNext();) {
 				act++;
 				List<MapPointHistory> actList = (List<MapPointHistory>) iteratorAct.next();
 				for (Iterator iterator2 = actList.iterator(); iterator2.hasNext();) {
-					MapPointHistory mph = (MapPointHistory) iterator2.next();
-					String nodeType = mph.getMapPointType();
-					if(!mph.getMapPointType().equals(NodeType.shop.toString())) {
-						if (mph.getPlayerStats().getFirst().getCardChoices() != null) {
-							boolean wasSkipped = eloCalculator.determinEloChange(mph.getPlayerStats().getFirst().getCardChoices());
+					MapPointHistory mapHistory = (MapPointHistory) iterator2.next();
+					String nodeType = mapHistory.getMapPointType();
+					if(!mapHistory.getMapPointType().equals(NodeType.shop.toString())) {
+						if (mapHistory.getMapPointType().equals(NodeType.ancient.toString())) {
+							eloCalculator.determinEloChangeAncientBonus(mapHistory.getPlayerStats().getFirst().getAncientChoice());
+						}
+						
+						if (mapHistory.getPlayerStats().getFirst().getCardChoices() != null) {
+							
+							boolean wasSkipped = eloCalculator.determinEloChange(mapHistory.getPlayerStats().getFirst().getCardChoices());
 							increaseCardCount(showsCard, card_reward_skip);
 							if (wasSkipped) {
+								skipCount++;
 								if (runData.getWin()) {
 									increaseCardCount(pickwinsWithCard, card_reward_skip);
 								}else {
 									increaseCardCount(picklossesWithCard, card_reward_skip);
 								}
 							}
-							for (Iterator iterator3 = mph.getPlayerStats().getFirst().getCardChoices().iterator(); iterator3.hasNext();) {
+							for (Iterator iterator3 = mapHistory.getPlayerStats().getFirst().getCardChoices().iterator(); iterator3.hasNext();) {
 								generateCardChoice(runData, iterator3);
 							}
 						}					
 						if (nodeType.equals(NodeType.ancient.toString())) {
-							if (mph.getPlayerStats().getFirst().getAncientChoice() != null) {							
-								generatePickRatesAncientBonus(mph.getRooms().getFirst().getModelId(),mph.getPlayerStats().getFirst().getAncientChoice(),runData);
+							if (mapHistory.getPlayerStats().getFirst().getAncientChoice() != null) {							
+								generatePickRatesAncientBonus(mapHistory.getRooms().getFirst().getModelId(),mapHistory.getPlayerStats().getFirst().getAncientChoice(),runData);
 							}
 						}
 						if (nodeType.equals(NodeType.monster.toString()) || nodeType.equals(NodeType.elite.toString()) || nodeType.equals(NodeType.boss.toString())) {
-							String monster = mph.getRooms().getFirst().getModelId();
-							int damage_taken = mph.getPlayerStats().getFirst().getDamageTaken();
-							int turns = mph.getRooms().getFirst().getTurnsTaken();
-							boolean won = mph.getPlayerStats().getFirst().getCurrentHp() > 0;
+							String monster = mapHistory.getRooms().getFirst().getModelId();
+							int damage_taken = mapHistory.getPlayerStats().getFirst().getDamageTaken();
+							int turns = mapHistory.getRooms().getFirst().getTurnsTaken();
+							boolean won = mapHistory.getPlayerStats().getFirst().getCurrentHp() > 0;
 							if (!monsters.containsKey(monster)) {
 								String actString = runData.getActs().get(act-1);
 								monsters.put(monster, new MonsterStat(actString,act,nodeType));
 							}
-							monsters.get(monster).merge(damage_taken, turns, won);
+							monsters.get(monster).merge(damage_taken, turns, !won);
 						}
 					}
 				}
-			}		
+			}
+			winContributionCalc.collectData(runData,skipCount);
+			winContributionCalc.collectRelicData(runData);
 		}
 	}
 	

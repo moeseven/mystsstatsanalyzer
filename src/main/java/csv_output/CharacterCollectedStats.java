@@ -2,6 +2,36 @@ package csv_output;
 
 public class CharacterCollectedStats extends BaseSTSStats {
 	
+	
+	
+	public String getCharacter() {
+		return character;
+	}
+
+	public double getFloor_reached_avg() {
+		return floor_reached_avg;
+	}
+
+	public double getWinRate() {
+		return winRate;
+	}
+
+	public double getFloor_reached_start_underdocks() {
+		return floor_reached_start_underdocks;
+	}
+
+	public double getWinRate_underdocks() {
+		return winRate_underdocks;
+	}
+
+	public double getFloor_reached_start_overgrowth() {
+		return floor_reached_start_overgrowth;
+	}
+
+	public double getWinRate_owergrowth() {
+		return winRate_owergrowth;
+	}
+
 	private String character;
 	private double floor_reached_avg;
 	private double winRate;
@@ -26,18 +56,18 @@ public class CharacterCollectedStats extends BaseSTSStats {
 
 	@Override
 	public String headerRow() {
-		return "character,avg floor reached, win rate, underdocks floor, underdocks win rate, overgrowth floor, overgrowth win rate";
+		return String.join(CsvWriter.seperator,"character","avg floor reached", "win rate", "underdocks floor", "underdocks win rate", "overgrowth floor", "overgrowth win rate");
 	}
 
 	@Override
-	public String toString() {
+	public String printRow() {
 		return 	character.substring(character.lastIndexOf('.') + 1)
-                +"," + floor_reached_avg
-                +"," + winRate
-                +"," + floor_reached_start_underdocks
-                +"," + winRate_underdocks
-                +"," + floor_reached_start_overgrowth
-                +"," + winRate_owergrowth
+                +CsvWriter.seperator  + floor_reached_avg
+                +CsvWriter.seperator  + winRate
+                +CsvWriter.seperator  + floor_reached_start_underdocks
+                +CsvWriter.seperator  + winRate_underdocks
+                +CsvWriter.seperator  + floor_reached_start_overgrowth
+                +CsvWriter.seperator  + winRate_owergrowth
                 ;
 	}
 
